@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
 const reviewSchema = mongoose.Schema({
-    productId:{
-        
+    productId: {
+
+    },
+    description: {
+        type: String,
+        required: true
     }
 })
