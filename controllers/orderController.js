@@ -16,19 +16,15 @@ export async function createOrder(req, res) {
 		orderInfo.name = req.user.firstName + " " + req.user.lastName;
 	}
 
-	//CBC00001
 	let orderId = "CBC00001";
 
-	const lastOrder = await Order.find().sort({ date: -1 }).limit(1);
-	//[]
-	if (lastOrder.length > 0) {
-		const lastOrderId = lastOrder[0].orderId; //"CBC00551"
-
-		const lastOrderNumberString = lastOrderId.replace("CBC", ""); //"00551"
-		const lastOrderNumber = parseInt(lastOrderNumberString); //551
-		const newOrderNumber = lastOrderNumber + 1; //552
+	// Ensure the generated orderId doesn't already exist (highly unlikely, but just to be safe)
+	while (await Order.findOne({ orderId: orderId })) {
+		const lastOrderNumberString = orderId.replace("CBC", "");
+		const lastOrderNumber = parseInt(lastOrderNumberString);
+		const newOrderNumber = lastOrderNumber + 1;
 		const newOrderNumberString = String(newOrderNumber).padStart(5, "0");
-		orderId = "CBC" + newOrderNumberString; //"CBC00552"
+		orderId = "CBC" + newOrderNumberString;
 	}
 	try {
 		let total = 0;
@@ -110,12 +106,12 @@ export async function getOrders(req, res) {
 	}
 	try {
 		if (req.user.role == "admin") {
-            const orders = await Order.find();
-            res.json(orders);
-		}else{
-            const orders = await Order.find({ email: req.user.email });
-            res.json(orders);
-        }
+			const orders = await Order.find();
+			res.json(orders);
+		} else {
+			const orders = await Order.find({ email: req.user.email });
+			res.json(orders);
+		}
 	} catch (err) {
 		res.status(500).json({
 			message: "Failed to fetch orders",
@@ -124,14 +120,14 @@ export async function getOrders(req, res) {
 	}
 }
 
-export async function updateOrderStatus(req,res){
+export async function updateOrderStatus(req, res) {
 	if (!isAdmin(req)) {
 		res.status(403).json({
 			message: "You are not authorized to update order status",
 		});
 		return;
 	}
-	try{
+	try {
 		const orderId = req.params.orderId;
 		const status = req.params.status;
 
@@ -140,7 +136,7 @@ export async function updateOrderStatus(req,res){
 				orderId: orderId
 			},
 			{
-				status : status
+				status: status
 			}
 		)
 
@@ -148,7 +144,7 @@ export async function updateOrderStatus(req,res){
 			message: "Order status updated successfully",
 		});
 
-	}catch(e){
+	} catch (e) {
 		res.status(500).json({
 			message: "Failed to update order status",
 			error: e,
@@ -156,8 +152,8 @@ export async function updateOrderStatus(req,res){
 		return;
 	}
 
-	
 
-	
-	
+
+
+
 }
